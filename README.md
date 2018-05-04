@@ -7,6 +7,7 @@ This POC is trying to use deep learning based method to track meaningful object 
 - **framework**: OpenCV + Caffe
 - **Network**: MobileNet SSD (Single Shot MultiBox Detection)
 
+![result1](https://github.com/mintaka33/deeplearning-encode/blob/master/result/p1.png?raw=true)
 
 ## Step2: ROI based Encoding
 
@@ -14,3 +15,6 @@ This POC is trying to use deep learning based method to track meaningful object 
 - **encode config**: CQP(qp=40) + DeltaQP(delta_qp = -20)
 - **platform**: Intel KBL Gen9 GPU
 
+![result2](https://github.com/mintaka33/deeplearning-encode/blob/master/result/p2.png?raw=true)
+
+![result3](https://github.com/mintaka33/deeplearning-encode/blob/master/result/p3.png?raw=true)
