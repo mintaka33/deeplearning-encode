@@ -3,3 +3,4 @@ _build
 
 *.db
 *.opendb
+*.user
