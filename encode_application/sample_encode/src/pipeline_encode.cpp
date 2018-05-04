@@ -755,6 +755,55 @@ mfxStatus CEncodingPipeline::ResetDevice()
     return MFX_ERR_NONE;
 }
 
+
+void CEncodingPipeline::loadROIFromFile(std::string fileName)
+{
+    std::fstream file;
+    std::string line;
+
+    m_listROI.clear();
+
+    file.open(fileName.c_str());
+
+    if (!file.is_open())
+        return;
+
+    getline(file, line);
+    while (line != "" && !file.eof())
+    {
+        ROIRect rect = {};
+        std::size_t pos;
+        std::string sub;
+
+        line.erase(0, 1);
+        line.erase(line.size() - 1, 1);
+
+        pos = line.find_first_of(",");
+        sub = line.substr(0, pos);
+        rect.x1 = atoi(sub.c_str());
+        line.erase(0, pos+1);
+
+        pos = line.find_first_of(",");
+        sub = line.substr(0, pos);
+        rect.y1 = atoi(sub.c_str());
+        line.erase(0, pos + 1);
+
+        pos = line.find_first_of(",");
+        sub = line.substr(0, pos);
+        rect.x2 = atoi(sub.c_str());
+        line.erase(0, pos + 1);
+
+        rect.y2 = atoi(line.c_str());
+
+        m_listROI.push_back(rect);
+        getline(file, line);
+    }
+
+    file.close();
+
+    return;
+}
+
 mfxStatus CEncodingPipeline::AllocFrames()
 {
     MSDK_CHECK_POINTER(GetFirstEncoder(), MFX_ERR_NOT_INITIALIZED);
@@ -1853,20 +1902,25 @@ mfxStatus CEncodingPipeline::Run()
             InsertIDR(m_bInsertIDR);
 
             mfxExtEncoderROI roiData = {};
-            roiData.Header.BufferId = MFX_EXTBUFF_ENCODER_ROI;
-            roiData.Header.BufferSz = sizeof(mfxExtEncoderROI);
-            roiData.NumROI = 1;
-            roiData.ROIMode = MFX_ROI_MODE_QP_DELTA;
-            roiData.ROI[0].Left = 616;
-            roiData.ROI[0].Top = 99;
-            roiData.ROI[0].Right = 1246;
-            roiData.ROI[0].Bottom = 641;
-            roiData.ROI[0].DeltaQP = -20;
+            if (1)
+            {
+                static int frameIndex = 0;
+                roiData.Header.BufferId = MFX_EXTBUFF_ENCODER_ROI;
+                roiData.Header.BufferSz = sizeof(mfxExtEncoderROI);
+                roiData.NumROI = 1;
+                roiData.ROIMode = MFX_ROI_MODE_QP_DELTA;
+                roiData.ROI[0].Left = m_listROI[frameIndex].x1;
+                roiData.ROI[0].Top = m_listROI[frameIndex].y1;
+                roiData.ROI[0].Right = m_listROI[frameIndex].x2;
+                roiData.ROI[0].Bottom = m_listROI[frameIndex].y2;
+                roiData.ROI[0].DeltaQP = -20;
 
-            mfxExtBuffer *extBuf[1];
-            extBuf[0] = (mfxExtBuffer*)&roiData;
-            m_encCtrl.NumExtParam = 1;
-            m_encCtrl.ExtParam = extBuf;
+                mfxExtBuffer *extBuf[1];
+                extBuf[0] = (mfxExtBuffer*)&roiData;
+                m_encCtrl.NumExtParam = 1;
+                m_encCtrl.ExtParam = extBuf;
+                frameIndex++;
+            }
 
             // at this point surface for encoder contains either a frame from file or a frame processed by vpp
             sts = m_pmfxENC->EncodeFrameAsync(&m_encCtrl, &m_pEncSurfaces[nEncSurfIdx], &pCurrentTask->mfxBS, &pCurrentTask->EncSyncP);

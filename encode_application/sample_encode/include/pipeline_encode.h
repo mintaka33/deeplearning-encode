@@ -39,6 +39,8 @@ or https://software.intel.com/en-us/media-client-solutions-support.
 
 #include <vector>
 #include <memory>
+#include <string>
+#include <fstream>
 
 #include "plugin_loader.h"
 
@@ -220,6 +222,14 @@ protected:
     virtual mfxU32 GetFreeTaskIndex();
 };
 
+struct ROIRect
+{
+    int x1;
+    int y1;
+    int x2;
+    int y2;
+};
+
 /* This class implements a pipeline with 2 mfx components: vpp (video preprocessing) and encode */
 class CEncodingPipeline
 {
@@ -232,6 +242,8 @@ public:
     virtual void Close();
     virtual mfxStatus ResetMFXComponents(sInputParams* pParams);
     virtual mfxStatus ResetDevice();
+
+    void loadROIFromFile(std::string fileName);
 
     void SetNumView(mfxU32 numViews) { m_nNumView = numViews; }
     virtual void  PrintInfo();
@@ -319,6 +331,7 @@ protected:
     bool   m_bIsFieldSplitting;
 
     mfxEncodeCtrl m_encCtrl;
+    std::vector<ROIRect> m_listROI;
 
     CTimeStatisticsReal m_statOverall;
     CTimeStatisticsReal m_statFile;
