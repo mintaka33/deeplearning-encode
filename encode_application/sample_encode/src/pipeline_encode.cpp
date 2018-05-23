@@ -804,6 +804,15 @@ void CEncodingPipeline::loadROIFromFile(std::string fileName)
     return;
 }
 
+void CEncodingPipeline::initDetector()
+{
+    std::string cfgFile = "MobileNetSSD_deploy.prototxt.txt";
+    std::string modelFile = "MobileNetSSD_deploy.caffemodel";
+    std::string framework = "caffe";
+
+    detector.initNet(cfgFile, modelFile, framework);
+}
+
 mfxStatus CEncodingPipeline::AllocFrames()
 {
     MSDK_CHECK_POINTER(GetFirstEncoder(), MFX_ERR_NOT_INITIALIZED);

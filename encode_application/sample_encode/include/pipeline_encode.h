@@ -246,6 +246,7 @@ public:
     virtual mfxStatus ResetDevice();
 
     void loadROIFromFile(std::string fileName);
+    void initDetector();
 
     void SetNumView(mfxU32 numViews) { m_nNumView = numViews; }
     virtual void  PrintInfo();

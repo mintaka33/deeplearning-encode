@@ -1275,6 +1275,7 @@ int main(int argc, char *argv[])
     MSDK_CHECK_STATUS(sts, "pPipeline->Init failed");
 
     pPipeline->loadROIFromFile("test3_roi.txt");
+    pPipeline->initDetector();
 
     pPipeline->PrintInfo();
 
