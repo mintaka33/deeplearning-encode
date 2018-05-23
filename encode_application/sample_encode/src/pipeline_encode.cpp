@@ -1902,7 +1902,7 @@ mfxStatus CEncodingPipeline::Run()
             InsertIDR(m_bInsertIDR);
 
             mfxExtEncoderROI roiData = {};
-            if (1)
+            if (0)
             {
                 static int frameIndex = 0;
                 roiData.Header.BufferId = MFX_EXTBUFF_ENCODER_ROI;
