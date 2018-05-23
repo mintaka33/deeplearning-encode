@@ -806,8 +806,8 @@ void CEncodingPipeline::loadROIFromFile(std::string fileName)
 
 void CEncodingPipeline::initDetector()
 {
-    std::string cfgFile = "MobileNetSSD_deploy.prototxt.txt";
-    std::string modelFile = "MobileNetSSD_deploy.caffemodel";
+    std::string cfgFile = "..\\..\\..\\object_detection\\MobileNetSSD_deploy.prototxt.txt";
+    std::string modelFile = "..\\..\\..\\object_detection\\MobileNetSSD_deploy.caffemodel";
     std::string framework = "caffe";
 
     detector.initNet(cfgFile, modelFile, framework);
@@ -1911,7 +1911,7 @@ mfxStatus CEncodingPipeline::Run()
             InsertIDR(m_bInsertIDR);
 
             mfxExtEncoderROI roiData = {};
-            if (1)
+            if (0)
             {
                 odc::Mat frame;
                 std::vector<odc::ObjectInfo> objInfo;
