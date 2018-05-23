@@ -1911,6 +1911,12 @@ mfxStatus CEncodingPipeline::Run()
             InsertIDR(m_bInsertIDR);
 
             mfxExtEncoderROI roiData = {};
+            if (1)
+            {
+                odc::Mat frame;
+                std::vector<odc::ObjectInfo> objInfo;
+                objInfo = detector.detectFrame(&frame);
+            }
             if (0)
             {
                 static int frameIndex = 0;
