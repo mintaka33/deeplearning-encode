@@ -813,6 +813,44 @@ void CEncodingPipeline::initDetector()
     detector.initNet(cfgFile, modelFile, framework);
 }
 
+mfxU8* CEncodingPipeline::convertToYV12(mfxFrameSurface1* pSurf)
+{
+    // check if input surface is NV12 format
+    if (pSurf->Info.FourCC != 0x3231564e) 
+        return nullptr;
+
+    mfxU8* yv12Buf = nullptr;
+    mfxU32 yv12Size = pSurf->Data.Pitch * pSurf->Info.Height * 3 / 2;
+    mfxU8* srcY = pSurf->Data.Y;
+    mfxU8* srcUV = pSurf->Data.CbCr;
+
+    yv12Buf = new mfxU8[yv12Size];
+    if (yv12Buf == nullptr)
+        return nullptr;
+
+    memset(yv12Buf, 0, yv12Size);
+
+    // Copy Y plane
+    mfxU32 ySize = pSurf->Data.Pitch * pSurf->Info.Height;
+    memcpy_s(yv12Buf, ySize, srcY, ySize);
+
+    // Copy U/V planes
+    mfxU32 uWidth = pSurf->Data.Pitch /2;
+    mfxU32 uHeight = pSurf->Info.Height / 2;
+    mfxU8* dstU = yv12Buf + ySize;
+    mfxU8* dstV = dstU + uWidth * uHeight;
+    for (mfxU16 i=0; i<pSurf->Info.Height/2; i++)
+    {
+        for (mfxU16 j = 0; j < pSurf->Data.Pitch / 2; j++)
+        {
+            dstV[i*uWidth + j] = srcUV[i*uWidth * 2 + j * 2];
+            dstU[i*uWidth + j] = srcUV[i*uWidth * 2 + j * 2 + 1];
+        }
+    }
+
+    return yv12Buf;
+}
+
 mfxStatus CEncodingPipeline::AllocFrames()
 {
     MSDK_CHECK_POINTER(GetFirstEncoder(), MFX_ERR_NOT_INITIALIZED);
@@ -1911,12 +1949,27 @@ mfxStatus CEncodingPipeline::Run()
             InsertIDR(m_bInsertIDR);
 
             mfxExtEncoderROI roiData = {};
-            if (0)
+            if (1)
             {
-                odc::Mat frame;
-                std::vector<odc::ObjectInfo> objInfo;
-                objInfo = detector.detectFrame(&frame);
+                mfxU8* yv12Buf = convertToYV12(pSurf);
+                if (yv12Buf)
+                {
+                    odc::Mat frame = odc::Mat(pSurf->Info.Height * 3 / 2, pSurf->Data.Pitch, CV_8UC1, yv12Buf);
+                    if (!frame.empty())
+                    {
+                        odc::Mat frameBGR;
+                        odc::cvtColor(frame, frameBGR, 99); // CV_YUV2BGR_YV12 = 99
+
+                        // below code is used to validate conversion correctness
+                        //odc::imwrite("test.bmp", frameBGR);
+
+                        std::vector<odc::ObjectInfo> objInfo;
+                        objInfo = detector.detectFrame(&frameBGR);
+                    }
+                    delete[] yv12Buf;
+                }
             }
+
             if (0)
             {
                 static int frameIndex = 0;

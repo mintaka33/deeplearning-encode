@@ -246,6 +246,7 @@ public:
     virtual mfxStatus ResetDevice();
 
     void loadROIFromFile(std::string fileName);
+    mfxU8* convertToYV12(mfxFrameSurface1* pSurf);
     void initDetector();
 
     void SetNumView(mfxU32 numViews) { m_nNumView = numViews; }
