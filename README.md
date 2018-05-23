@@ -1,6 +1,6 @@
 # deeplearning-encode
 
-This POC is trying to use deep learning based method to track meaningful object in video stream, then use the tracked location as ROI region and feed into encode application for ROI based encoding, with which the region of meaningful object will be allocated more bits in encoding, therefore better visual quality.
+This POC is trying to use deep learning based method to detect interested object in video stream, then use the detection rectangle as ROI region and feed into encode application for ROI based encoding, with which the region of interested object will be allocated more bits in encoding, therefore better visual quality.
 
 ## Step1: Object detection
 
