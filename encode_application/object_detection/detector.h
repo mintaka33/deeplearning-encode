@@ -9,6 +9,8 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+namespace odc
+{
 using namespace cv;
 using namespace dnn;
 
@@ -53,4 +55,4 @@ private:
     std::vector<std::string> vocNames; // class name of Pascal VOC training set
     std::vector<std::string> cocoNames; // class name of VOCO training set
 };
-
+}

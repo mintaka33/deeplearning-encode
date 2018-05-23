@@ -179,7 +179,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(INTELMEDIASDKROOT)\include;$(ProjectDir)\..\sample_common\include;$(ProjectDir)\..\sample_plugins\rotate_cpu\include;$(OPENCV_DIR)\..\..\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(INTELMEDIASDKROOT)\include;$(ProjectDir)\..\sample_common\include;$(ProjectDir)\..\sample_plugins\rotate_cpu\include;$(OPENCV_DIR)\..\..\include;$(ProjectDir)..\object_detection</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>TIME_STATS;WIN64;_DEBUG;_CONSOLE;_ITERATOR_DEBUG_LEVEL=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -208,7 +208,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(INTELMEDIASDKROOT)\include;$(ProjectDir)\..\sample_common\include;$(ProjectDir)\..\sample_plugins\rotate_cpu\include;$(OPENCV_DIR)\..\..\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(INTELMEDIASDKROOT)\include;$(ProjectDir)\..\sample_common\include;$(ProjectDir)\..\sample_plugins\rotate_cpu\include;$(OPENCV_DIR)\..\..\include;$(ProjectDir)..\object_detection</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN64;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -264,7 +264,7 @@
       <TargetEnvironment>X64</TargetEnvironment>
     </Midl>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(INTELMEDIASDKROOT)\include;$(ProjectDir)\..\sample_common\include;$(ProjectDir)\..\sample_plugins\rotate_cpu\include;$(OPENCV_DIR)\..\..\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\include;$(INTELMEDIASDKROOT)\include;$(ProjectDir)\..\sample_common\include;$(ProjectDir)\..\sample_plugins\rotate_cpu\include;$(OPENCV_DIR)\..\..\include;$(ProjectDir)..\object_detection</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>TIME_STATS;WIN64;NDEBUG;_CONSOLE;SAVE_RECON;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>

@@ -46,6 +46,8 @@ or https://software.intel.com/en-us/media-client-solutions-support.
 
 #include "preset_manager.h"
 
+#include "detector.h"
+
 #if defined (ENABLE_V4L2_SUPPORT)
 #include "v4l2_util.h"
 #endif
@@ -332,6 +334,7 @@ protected:
 
     mfxEncodeCtrl m_encCtrl;
     std::vector<ROIRect> m_listROI;
+    odc::DNNDetector detector;
 
     CTimeStatisticsReal m_statOverall;
     CTimeStatisticsReal m_statFile;
