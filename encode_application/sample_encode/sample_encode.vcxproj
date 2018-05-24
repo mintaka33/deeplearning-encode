@@ -30,6 +30,7 @@
     <ProjectGuid>{B5CEF93B-C13B-48CB-AAFD-848B6740A749}</ProjectGuid>
     <RootNamespace>video_enc_con</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -193,8 +194,8 @@
     </ClCompile>
     <Link>
       <AdditionalOptions>/DYNAMICBASE /NXCOMPAT %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libmfx_vs2015.lib;dxva2.lib;d3d9.lib;d3d11.lib;dxgi.lib;opencv_world400d.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(INTELMEDIASDKROOT)\lib\$(Platform);$(OPENCV_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libmfx_vs2015.lib;dxva2.lib;d3d9.lib;d3d11.lib;dxgi.lib;opencv_core400d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(INTELMEDIASDKROOT)\lib\$(Platform);$(OPENCV_DIR)\staticlib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;msvcrtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetDir)$(TargetName).pdb</ProgramDatabaseFile>
@@ -273,16 +274,18 @@
       </PrecompiledHeader>
       <WarningLevel>Level4</WarningLevel>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <DebugInformationFormat>
-      </DebugInformationFormat>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <AdditionalOptions>/Wv:18 %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>Disabled</Optimization>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <OmitFramePointers>false</OmitFramePointers>
     </ClCompile>
     <Link>
       <AdditionalOptions>/DYNAMICBASE /NXCOMPAT %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libmfx_vs2015.lib;dxva2.lib;d3d9.lib;d3d11.lib;dxgi.lib;opencv_world400.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(INTELMEDIASDKROOT)\lib\$(Platform);$(OPENCV_DIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libmfx_vs2015.lib;dxva2.lib;d3d9.lib;d3d11.lib;dxgi.lib;IlmImf.lib;ippicvmt.lib;ippiw.lib;ittnotify.lib;libjasper.lib;libjpeg-turbo.lib;libpng.lib;libprotobuf.lib;libtiff.lib;libwebp.lib;opencv_calib3d400.lib;opencv_core400.lib;opencv_dnn400.lib;opencv_features2d400.lib;opencv_flann400.lib;opencv_highgui400.lib;opencv_imgcodecs400.lib;opencv_imgproc400.lib;opencv_ml400.lib;opencv_objdetect400.lib;opencv_photo400.lib;opencv_shape400.lib;opencv_stitching400.lib;opencv_superres400.lib;opencv_video400.lib;opencv_videoio400.lib;opencv_videostab400.lib;zlib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(INTELMEDIASDKROOT)\lib\$(Platform);$(OPENCV_DIR)\staticlib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <IgnoreSpecificDefaultLibraries>msvcrt.lib;msvcrtd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
