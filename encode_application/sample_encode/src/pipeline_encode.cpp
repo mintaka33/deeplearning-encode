@@ -1965,11 +1965,42 @@ mfxStatus CEncodingPipeline::Run()
 
                         std::vector<odc::ObjectInfo> objInfo;
                         objInfo = detector.detectFrame(&frameBGR);
+
+                        bool enableROI = false;
+                        odc::ObjectInfo roiInfo = {};
+                        for (auto o : objInfo)
+                        {
+                            if (o.name == "person" && o.confidence >0.9)
+                            {
+                                enableROI = true;
+                                roiInfo = o;
+                                break;
+                            }
+                        }
+
+                        if (enableROI)
+                        {
+                            roiData.Header.BufferId = MFX_EXTBUFF_ENCODER_ROI;
+                            roiData.Header.BufferSz = sizeof(mfxExtEncoderROI);
+                            roiData.NumROI = 1;
+                            roiData.ROIMode = MFX_ROI_MODE_QP_DELTA;
+                            roiData.ROI[0].Left = roiInfo.left;
+                            roiData.ROI[0].Top = roiInfo.top;
+                            roiData.ROI[0].Right = roiInfo.right;
+                            roiData.ROI[0].Bottom = roiInfo.bottom;
+                            roiData.ROI[0].DeltaQP = -30;
+
+                            mfxExtBuffer *extBuf[1];
+                            extBuf[0] = (mfxExtBuffer*)&roiData;
+                            m_encCtrl.NumExtParam = 1;
+                            m_encCtrl.ExtParam = extBuf;
+                        }
                     }
                     delete[] yv12Buf;
                 }
             }
 
+#if 0
             if (0)
             {
                 static int frameIndex = 0;
@@ -1989,6 +2020,7 @@ mfxStatus CEncodingPipeline::Run()
                 m_encCtrl.ExtParam = extBuf;
                 frameIndex++;
             }
+#endif
 
             // at this point surface for encoder contains either a frame from file or a frame processed by vpp
             sts = m_pmfxENC->EncodeFrameAsync(&m_encCtrl, &m_pEncSurfaces[nEncSurfIdx], &pCurrentTask->mfxBS, &pCurrentTask->EncSyncP);
