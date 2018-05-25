@@ -4,6 +4,11 @@ This POC is trying to use deep learning based method to detect interested object
 
 ## Implementation #1: MSDK encode with detector class (standalone)
 
+**Note1**: When link OpenCV library into MSDK app, it seems we cannot use OpenCV dynamic library (DLL) because MSDK app will run into a failure in OpenCV NN module. There is no such issue if use OpenCV static library (LIB). 
+
+**Note2**: When link OpenCV static library into MSDK, for debug build, there are some LINK errors in building app (suspect MSDK sample app compiling config issue?), so have to use release build to workaround it.
+
+
 ## Implementation #2: OpenCV Python + MSDK Encode (two steps)
 
 ### Step1: Object detection
