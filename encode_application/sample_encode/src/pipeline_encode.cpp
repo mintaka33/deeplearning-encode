@@ -1988,7 +1988,7 @@ mfxStatus CEncodingPipeline::Run()
                             roiData.ROI[0].Top = roiInfo.top;
                             roiData.ROI[0].Right = roiInfo.right;
                             roiData.ROI[0].Bottom = roiInfo.bottom;
-                            roiData.ROI[0].DeltaQP = -30;
+                            roiData.ROI[0].DeltaQP = -20;
 
                             mfxExtBuffer *extBuf[1];
                             extBuf[0] = (mfxExtBuffer*)&roiData;
