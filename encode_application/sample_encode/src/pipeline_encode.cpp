@@ -806,8 +806,8 @@ void CEncodingPipeline::loadROIFromFile(std::string fileName)
 
 void CEncodingPipeline::initDetector()
 {
-    std::string cfgFile = "..\\..\\..\\object_detection\\MobileNetSSD_deploy.prototxt.txt";
-    std::string modelFile = "..\\..\\..\\object_detection\\MobileNetSSD_deploy.caffemodel";
+    std::string cfgFile = "MobileNetSSD_deploy.prototxt.txt";// "..\\..\\..\\object_detection\\MobileNetSSD_deploy.prototxt.txt";
+    std::string modelFile = "MobileNetSSD_deploy.caffemodel";// "..\\..\\..\\object_detection\\MobileNetSSD_deploy.caffemodel";
     std::string framework = "caffe";
 
     detector.initNet(cfgFile, modelFile, framework);
@@ -1970,7 +1970,7 @@ mfxStatus CEncodingPipeline::Run()
                         odc::ObjectInfo roiInfo = {};
                         for (auto o : objInfo)
                         {
-                            if (o.name == "person" && o.confidence >0.9)
+                            if (o.name == "person" && o.confidence >0.6)
                             {
                                 enableROI = true;
                                 roiInfo = o;
@@ -1982,13 +1982,41 @@ mfxStatus CEncodingPipeline::Run()
                         {
                             roiData.Header.BufferId = MFX_EXTBUFF_ENCODER_ROI;
                             roiData.Header.BufferSz = sizeof(mfxExtEncoderROI);
-                            roiData.NumROI = 1;
+                            roiData.NumROI = 5;
                             roiData.ROIMode = MFX_ROI_MODE_QP_DELTA;
                             roiData.ROI[0].Left = roiInfo.left;
                             roiData.ROI[0].Top = roiInfo.top;
                             roiData.ROI[0].Right = roiInfo.right;
                             roiData.ROI[0].Bottom = roiInfo.bottom;
-                            roiData.ROI[0].DeltaQP = -20;
+                            roiData.ROI[0].DeltaQP = -30;
+
+                            roiData.ROIMode = MFX_ROI_MODE_QP_DELTA;
+                            roiData.ROI[1].Left = roiInfo.left - 16;
+                            roiData.ROI[1].Top = roiInfo.top  - 16;
+                            roiData.ROI[1].Right = roiInfo.right + 16;
+                            roiData.ROI[1].Bottom = roiInfo.bottom;
+                            roiData.ROI[1].DeltaQP = -25;
+
+                            roiData.ROIMode = MFX_ROI_MODE_QP_DELTA;
+                            roiData.ROI[2].Left = roiInfo.left - 32;
+                            roiData.ROI[2].Top = roiInfo.top - 32;
+                            roiData.ROI[2].Right = roiInfo.right + 32;
+                            roiData.ROI[2].Bottom = roiInfo.bottom;
+                            roiData.ROI[2].DeltaQP = -20;
+
+                            roiData.ROIMode = MFX_ROI_MODE_QP_DELTA;
+                            roiData.ROI[3].Left = roiInfo.left - 48;
+                            roiData.ROI[3].Top = roiInfo.top - 48;
+                            roiData.ROI[3].Right = roiInfo.right + 48;
+                            roiData.ROI[3].Bottom = roiInfo.bottom;
+                            roiData.ROI[3].DeltaQP = -15;
+
+                            roiData.ROIMode = MFX_ROI_MODE_QP_DELTA;
+                            roiData.ROI[4].Left = roiInfo.left - 64;
+                            roiData.ROI[4].Top = roiInfo.top - 64;
+                            roiData.ROI[4].Right = roiInfo.right + 64;
+                            roiData.ROI[4].Bottom = roiInfo.bottom;
+                            roiData.ROI[4].DeltaQP = -10;
 
                             mfxExtBuffer *extBuf[1];
                             extBuf[0] = (mfxExtBuffer*)&roiData;
