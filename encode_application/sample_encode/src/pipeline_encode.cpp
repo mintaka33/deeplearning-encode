@@ -49,42 +49,6 @@ or https://software.intel.com/en-us/media-client-solutions-support.
 #error MFX_VERSION not defined
 #endif
 
-#include <fstream>
-
-class EncodeCfg
-{
-public:
-    EncodeCfg() 
-    {
-        deltaQP_[0] = -30;
-        deltaQP_[1] = -25;
-        deltaQP_[2] = -20;
-        deltaQP_[3] = -15;
-
-        int val = 0;
-        char strData[8] = {};
-        std::ifstream f("dqp.txt");
-        for (int i =0; i<4; i++)
-        {
-            if (!f.getline(strData, 8).good())
-                break;
-            val = atoi(strData);
-            deltaQP_[i] = (mfxI16)-val;
-        }
-        f.close();
-    }
-    ~EncodeCfg() {}
-
-    mfxI16* getDeltaQP()
-    {
-        return deltaQP_;
-    }
-
-private:
-    mfxI16 deltaQP_[256] = {};
-};
-EncodeCfg EncCfg;
-
 /* obtain the clock tick of an uninterrupted master clock */
 msdk_tick time_get_tick(void)
 {
@@ -2003,6 +1967,7 @@ mfxStatus CEncodingPipeline::Run()
                         objInfo = detector.detectFrame(&frameBGR);
 
                         bool enableROI = false;
+                        mfxU16 regionIndex = 0;
                         odc::ObjectInfo roiInfo = {};
                         for (auto o : objInfo)
                         {
@@ -2010,7 +1975,19 @@ mfxStatus CEncodingPipeline::Run()
                             {
                                 enableROI = true;
                                 roiInfo = o;
-                                break;
+                                roiData.ROI[regionIndex + 0].Left = roiInfo.left;
+                                roiData.ROI[regionIndex + 0].Top = roiInfo.top;
+                                roiData.ROI[regionIndex + 0].Right = roiInfo.right;
+                                roiData.ROI[regionIndex + 0].Bottom = roiInfo.bottom;
+                                roiData.ROI[regionIndex + 0].DeltaQP = -20;
+                                roiData.ROI[regionIndex + 1].Left = roiInfo.left - 32;
+                                roiData.ROI[regionIndex + 1].Top = roiInfo.top - 32;
+                                roiData.ROI[regionIndex + 1].Right = roiInfo.right + 32;
+                                roiData.ROI[regionIndex + 1].Bottom = roiInfo.bottom;
+                                roiData.ROI[regionIndex + 1].DeltaQP = -10;
+                                regionIndex += 2;
+                                if (regionIndex >= 4)
+                                    break;
                             }
                         }
 
@@ -2018,34 +1995,8 @@ mfxStatus CEncodingPipeline::Run()
                         {
                             roiData.Header.BufferId = MFX_EXTBUFF_ENCODER_ROI;
                             roiData.Header.BufferSz = sizeof(mfxExtEncoderROI);
-                            roiData.NumROI = 4;
                             roiData.ROIMode = MFX_ROI_MODE_QP_DELTA;
-                            roiData.ROI[0].Left = roiInfo.left;
-                            roiData.ROI[0].Top = roiInfo.top;
-                            roiData.ROI[0].Right = roiInfo.right;
-                            roiData.ROI[0].Bottom = roiInfo.bottom;
-                            roiData.ROI[0].DeltaQP = EncCfg.getDeltaQP()[0];
-
-                            roiData.ROIMode = MFX_ROI_MODE_QP_DELTA;
-                            roiData.ROI[1].Left = roiInfo.left - 16;
-                            roiData.ROI[1].Top = roiInfo.top  - 16;
-                            roiData.ROI[1].Right = roiInfo.right + 16;
-                            roiData.ROI[1].Bottom = roiInfo.bottom;
-                            roiData.ROI[1].DeltaQP = EncCfg.getDeltaQP()[1];
-
-                            roiData.ROIMode = MFX_ROI_MODE_QP_DELTA;
-                            roiData.ROI[2].Left = roiInfo.left - 32;
-                            roiData.ROI[2].Top = roiInfo.top - 32;
-                            roiData.ROI[2].Right = roiInfo.right + 32;
-                            roiData.ROI[2].Bottom = roiInfo.bottom;
-                            roiData.ROI[2].DeltaQP = EncCfg.getDeltaQP()[2];
-
-                            roiData.ROIMode = MFX_ROI_MODE_QP_DELTA;
-                            roiData.ROI[3].Left = roiInfo.left - 48;
-                            roiData.ROI[3].Top = roiInfo.top - 48;
-                            roiData.ROI[3].Right = roiInfo.right + 48;
-                            roiData.ROI[3].Bottom = roiInfo.bottom;
-                            roiData.ROI[3].DeltaQP = EncCfg.getDeltaQP()[3];
+                            roiData.NumROI = (regionIndex >= 4) ? 4 : regionIndex;
 
                             mfxExtBuffer *extBuf[1];
                             extBuf[0] = (mfxExtBuffer*)&roiData;
