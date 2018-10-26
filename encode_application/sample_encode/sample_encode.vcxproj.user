@@ -11,7 +11,7 @@ $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
     <LocalDebuggerEnvironment>PATH=$(PATH);$(OPENCV_DIR)\bin
 $(LocalDebuggerEnvironment)</LocalDebuggerEnvironment>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>h264 -i test3.yuv -o out.264 -w 1280 -h 720 -hw -u veryfast -cqp -qpi 50 -qpp 50 -qpb 50</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>h264 -i yy1.yuv -o yy1.264 -w 1280 -h 720 -hw -u veryfast -cqp -qpi 50 -qpp 50 -qpb 50</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(OutDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug_WithDebugAPI|x64'">
