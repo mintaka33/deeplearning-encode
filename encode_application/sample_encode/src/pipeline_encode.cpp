@@ -49,6 +49,42 @@ or https://software.intel.com/en-us/media-client-solutions-support.
 #error MFX_VERSION not defined
 #endif
 
+#include <fstream>
+
+class EncodeCfg
+{
+public:
+    EncodeCfg()
+    {
+        deltaQP_[0] = -30;
+        deltaQP_[1] = -25;
+        deltaQP_[2] = -20;
+        deltaQP_[3] = -15;
+
+        int val = 0;
+        char strData[8] = {};
+        std::ifstream f("dqp.txt");
+        for (int i = 0; i < 4; i++)
+        {
+            if (!f.getline(strData, 8).good())
+                break;
+            val = atoi(strData);
+            deltaQP_[i] = (mfxI16)-val;
+        }
+        f.close();
+    }
+    ~EncodeCfg() {}
+
+    mfxI16* getDeltaQP()
+    {
+        return deltaQP_;
+    }
+
+private:
+    mfxI16 deltaQP_[256] = {};
+};
+EncodeCfg EncCfg;
+
 /* obtain the clock tick of an uninterrupted master clock */
 msdk_tick time_get_tick(void)
 {
@@ -1979,12 +2015,12 @@ mfxStatus CEncodingPipeline::Run()
                                 roiData.ROI[regionIndex + 0].Top = roiInfo.top;
                                 roiData.ROI[regionIndex + 0].Right = roiInfo.right;
                                 roiData.ROI[regionIndex + 0].Bottom = roiInfo.bottom;
-                                roiData.ROI[regionIndex + 0].DeltaQP = -20;
+                                roiData.ROI[regionIndex + 0].DeltaQP = EncCfg.getDeltaQP()[regionIndex + 0];
                                 roiData.ROI[regionIndex + 1].Left = roiInfo.left - 32;
                                 roiData.ROI[regionIndex + 1].Top = roiInfo.top - 32;
                                 roiData.ROI[regionIndex + 1].Right = roiInfo.right + 32;
                                 roiData.ROI[regionIndex + 1].Bottom = roiInfo.bottom;
-                                roiData.ROI[regionIndex + 1].DeltaQP = -10;
+                                roiData.ROI[regionIndex + 1].DeltaQP = EncCfg.getDeltaQP()[regionIndex + 1];
                                 regionIndex += 2;
                                 if (regionIndex >= 4)
                                     break;
