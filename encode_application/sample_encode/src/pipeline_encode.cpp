@@ -51,6 +51,42 @@ or https://software.intel.com/en-us/media-client-solutions-support.
 
 #include <fstream>
 
+mfxI32 gframeIndex = 0;
+
+class LogUtility
+{
+public:
+    LogUtility()
+    {
+        logFile_.open("log.txt");
+    };
+    ~LogUtility()
+    {
+        logFile_.close();
+    };
+
+    void print(const char* str, ...)
+    {
+        if (str != nullptr)
+        {
+            va_list args;
+            va_start(args, str);
+            const size_t length = _vscprintf(str, args);
+            char* tmp = new char [length + 1];
+            if (tmp)
+            {
+                vsprintf_s(tmp, length + 1, str, args);
+                logFile_ << tmp << std::endl;
+            }
+            va_end(args);
+        }
+    }
+
+private:
+    std::ofstream logFile_;
+};
+LogUtility logUtil;
+
 class EncodeCfg
 {
 public:
@@ -64,6 +100,37 @@ public:
         int val = 0;
         char strData[8] = {};
         std::ifstream f("dqp.txt");
+
+        // read ROI enable flag
+        if (!f.getline(strData, 8).good())
+        {
+            f.close();
+            return;
+        }
+        enableROI_ = (atoi(strData) == 0) ? false : true;
+        if (!enableROI_)
+        {
+            f.close();
+            return;
+        }
+
+        // read confidence
+        if (!f.getline(strData, 8).good())
+        {
+            f.close();
+            return;
+        }
+        confidence_ = std::stof(strData);
+
+        // read single ROI flag
+        if (!f.getline(strData, 8).good())
+        {
+            f.close();
+            return;
+        }
+        singleROI_ = (atoi(strData) == 0) ? false : true;
+
+        // read delta_qp
         for (int i = 0; i < 4; i++)
         {
             if (!f.getline(strData, 8).good())
@@ -72,16 +139,22 @@ public:
             deltaQP_[i] = (mfxI16)-val;
         }
         f.close();
+
+        logUtil.print("enableROI = %d, confidence = %f, singleRoiFlag = %d, delta_qp=[%d, %d, %d, %d]", 
+            enableROI_, confidence_, singleROI_, deltaQP_[0], deltaQP_[1], deltaQP_[2], deltaQP_[3]);
     }
     ~EncodeCfg() {}
 
-    mfxI16* getDeltaQP()
-    {
-        return deltaQP_;
-    }
+    mfxI16* getDeltaQP() { return deltaQP_; }
+    bool getRoiEnalbe() { return enableROI_; }
+    float getConfidence() { return confidence_; }
+    bool getSingleRoiFlag() { return singleROI_; }
 
 private:
     mfxI16 deltaQP_[256] = {};
+    bool enableROI_ = false;
+    float confidence_ = (float)0.6;
+    bool singleROI_ = 1;
 };
 EncodeCfg EncCfg;
 
@@ -1985,7 +2058,7 @@ mfxStatus CEncodingPipeline::Run()
             InsertIDR(m_bInsertIDR);
 
             mfxExtEncoderROI roiData = {};
-            if (1)
+            if (EncCfg.getRoiEnalbe())
             {
                 mfxU8* yv12Buf = convertToYV12(pSurf);
                 if (yv12Buf)
@@ -2007,28 +2080,67 @@ mfxStatus CEncodingPipeline::Run()
                         odc::ObjectInfo roiInfo = {};
                         for (auto o : objInfo)
                         {
-                            if (o.name == "person" && o.confidence >0.6)
+                            if (o.name == "person" && o.confidence > EncCfg.getConfidence())
                             {
-                                enableROI = true;
-                                roiInfo = o;
-                                roiData.ROI[regionIndex + 0].Left = roiInfo.left;
-                                roiData.ROI[regionIndex + 0].Top = roiInfo.top;
-                                roiData.ROI[regionIndex + 0].Right = roiInfo.right;
-                                roiData.ROI[regionIndex + 0].Bottom = roiInfo.bottom;
-                                roiData.ROI[regionIndex + 0].DeltaQP = EncCfg.getDeltaQP()[regionIndex + 0];
-                                roiData.ROI[regionIndex + 1].Left = roiInfo.left - 32;
-                                roiData.ROI[regionIndex + 1].Top = roiInfo.top - 32;
-                                roiData.ROI[regionIndex + 1].Right = roiInfo.right + 32;
-                                roiData.ROI[regionIndex + 1].Bottom = roiInfo.bottom;
-                                roiData.ROI[regionIndex + 1].DeltaQP = EncCfg.getDeltaQP()[regionIndex + 1];
-                                regionIndex += 2;
-                                if (regionIndex >= 4)
-                                    break;
+                                if (EncCfg.getSingleRoiFlag()) // one person
+                                {
+                                    enableROI = true;
+                                    roiInfo = o;
+                                    roiData.ROI[regionIndex + 0].Left = roiInfo.left;
+                                    roiData.ROI[regionIndex + 0].Top = roiInfo.top;
+                                    roiData.ROI[regionIndex + 0].Right = roiInfo.right;
+                                    roiData.ROI[regionIndex + 0].Bottom = roiInfo.bottom;
+                                    roiData.ROI[regionIndex + 0].DeltaQP = EncCfg.getDeltaQP()[regionIndex + 0];
+                                    roiData.ROI[regionIndex + 1].Left = roiInfo.left - 16;
+                                    roiData.ROI[regionIndex + 1].Top = roiInfo.top - 16;
+                                    roiData.ROI[regionIndex + 1].Right = roiInfo.right + 16;
+                                    roiData.ROI[regionIndex + 1].Bottom = roiInfo.bottom;
+                                    roiData.ROI[regionIndex + 1].DeltaQP = EncCfg.getDeltaQP()[regionIndex + 1];
+                                    roiData.ROI[regionIndex + 2].Left = roiInfo.left - 32;
+                                    roiData.ROI[regionIndex + 2].Top = roiInfo.top - 32;
+                                    roiData.ROI[regionIndex + 2].Right = roiInfo.right + 32;
+                                    roiData.ROI[regionIndex + 2].Bottom = roiInfo.bottom;
+                                    roiData.ROI[regionIndex + 2].DeltaQP = EncCfg.getDeltaQP()[regionIndex + 2];
+                                    roiData.ROI[regionIndex + 3].Left = roiInfo.left - 48;
+                                    roiData.ROI[regionIndex + 3].Top = roiInfo.top - 48;
+                                    roiData.ROI[regionIndex + 3].Right = roiInfo.right + 48;
+                                    roiData.ROI[regionIndex + 3].Bottom = roiInfo.bottom;
+                                    roiData.ROI[regionIndex + 3].DeltaQP = EncCfg.getDeltaQP()[regionIndex + 3];
+                                    regionIndex += 4;
+                                    if (regionIndex >= 4)
+                                        break;
+                                } 
+                                else // two person
+                                {
+                                    enableROI = true;
+                                    roiInfo = o;
+                                    roiData.ROI[regionIndex + 0].Left = roiInfo.left;
+                                    roiData.ROI[regionIndex + 0].Top = roiInfo.top;
+                                    roiData.ROI[regionIndex + 0].Right = roiInfo.right;
+                                    roiData.ROI[regionIndex + 0].Bottom = roiInfo.bottom;
+                                    roiData.ROI[regionIndex + 0].DeltaQP = EncCfg.getDeltaQP()[regionIndex + 0];
+                                    roiData.ROI[regionIndex + 1].Left = roiInfo.left - 32;
+                                    roiData.ROI[regionIndex + 1].Top = roiInfo.top - 32;
+                                    roiData.ROI[regionIndex + 1].Right = roiInfo.right + 32;
+                                    roiData.ROI[regionIndex + 1].Bottom = roiInfo.bottom;
+                                    roiData.ROI[regionIndex + 1].DeltaQP = EncCfg.getDeltaQP()[regionIndex + 1];
+                                    regionIndex += 2;
+                                    if (regionIndex >= 4)
+                                        break;
+                                }
+                                
                             }
                         }
 
                         if (enableROI)
                         {
+                            logUtil.print("frame# %04d, confidence = %f, [%04d, %04d, %04d, %04d], [%04d, %04d, %04d, %04d], [%04d, %04d, %04d, %04d], [%04d, %04d, %04d, %04d]",
+                                gframeIndex, roiInfo.confidence,
+                                roiData.ROI[0].Left, roiData.ROI[0].Top, roiData.ROI[0].Right, roiData.ROI[0].Bottom,
+                                roiData.ROI[1].Left, roiData.ROI[1].Top, roiData.ROI[1].Right, roiData.ROI[1].Bottom,
+                                roiData.ROI[2].Left, roiData.ROI[2].Top, roiData.ROI[2].Right, roiData.ROI[2].Bottom,
+                                roiData.ROI[3].Left, roiData.ROI[3].Top, roiData.ROI[3].Right, roiData.ROI[3].Bottom);
+
                             roiData.Header.BufferId = MFX_EXTBUFF_ENCODER_ROI;
                             roiData.Header.BufferSz = sizeof(mfxExtEncoderROI);
                             roiData.ROIMode = MFX_ROI_MODE_QP_DELTA;
@@ -2038,6 +2150,10 @@ mfxStatus CEncodingPipeline::Run()
                             extBuf[0] = (mfxExtBuffer*)&roiData;
                             m_encCtrl.NumExtParam = 1;
                             m_encCtrl.ExtParam = extBuf;
+                        }
+                        else
+                        {
+                            logUtil.print("frame# %04d", gframeIndex);
                         }
                     }
                     delete[] yv12Buf;
@@ -2069,6 +2185,7 @@ mfxStatus CEncodingPipeline::Run()
             // at this point surface for encoder contains either a frame from file or a frame processed by vpp
             sts = m_pmfxENC->EncodeFrameAsync(&m_encCtrl, &m_pEncSurfaces[nEncSurfIdx], &pCurrentTask->mfxBS, &pCurrentTask->EncSyncP);
             m_bInsertIDR = false;
+            gframeIndex++;
 
             if (m_nMemBuffer)
             {
