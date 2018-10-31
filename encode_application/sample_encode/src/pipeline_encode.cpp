@@ -2134,13 +2134,6 @@ mfxStatus CEncodingPipeline::Run()
 
                         if (enableROI)
                         {
-                            logUtil.print("frame# %04d, confidence = %f, [%04d, %04d, %04d, %04d], [%04d, %04d, %04d, %04d], [%04d, %04d, %04d, %04d], [%04d, %04d, %04d, %04d]",
-                                gframeIndex, roiInfo.confidence,
-                                roiData.ROI[0].Left, roiData.ROI[0].Top, roiData.ROI[0].Right, roiData.ROI[0].Bottom,
-                                roiData.ROI[1].Left, roiData.ROI[1].Top, roiData.ROI[1].Right, roiData.ROI[1].Bottom,
-                                roiData.ROI[2].Left, roiData.ROI[2].Top, roiData.ROI[2].Right, roiData.ROI[2].Bottom,
-                                roiData.ROI[3].Left, roiData.ROI[3].Top, roiData.ROI[3].Right, roiData.ROI[3].Bottom);
-
                             roiData.Header.BufferId = MFX_EXTBUFF_ENCODER_ROI;
                             roiData.Header.BufferSz = sizeof(mfxExtEncoderROI);
                             roiData.ROIMode = MFX_ROI_MODE_QP_DELTA;
@@ -2150,6 +2143,13 @@ mfxStatus CEncodingPipeline::Run()
                             extBuf[0] = (mfxExtBuffer*)&roiData;
                             m_encCtrl.NumExtParam = 1;
                             m_encCtrl.ExtParam = extBuf;
+
+                            logUtil.print("frame# %04d, confidence = %f, numROI = %d, [%04d, %04d, %04d, %04d], [%04d, %04d, %04d, %04d], [%04d, %04d, %04d, %04d], [%04d, %04d, %04d, %04d]",
+                                gframeIndex, roiInfo.confidence, roiData.NumROI,
+                                roiData.ROI[0].Left, roiData.ROI[0].Top, roiData.ROI[0].Right, roiData.ROI[0].Bottom,
+                                roiData.ROI[1].Left, roiData.ROI[1].Top, roiData.ROI[1].Right, roiData.ROI[1].Bottom,
+                                roiData.ROI[2].Left, roiData.ROI[2].Top, roiData.ROI[2].Right, roiData.ROI[2].Bottom,
+                                roiData.ROI[3].Left, roiData.ROI[3].Top, roiData.ROI[3].Right, roiData.ROI[3].Bottom);
                         }
                         else
                         {
